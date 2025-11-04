@@ -1,266 +1,333 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Tienda de Golosinas - La Económica</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8">
+  <title>Tienda de Golosinas 🍬</title>
   <style>
-    /* === Estilo oscuro / igual al simulador original === */
-    :root{
-      --bg:#000;
-      --card:#1c1c1c;
-      --accent:#ff3333;
-      --muted:#bbbbbb;
-      --text:#fff;
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #fff0f5;
+      margin: 0;
+      padding: 0;
     }
-    html,body{height:100%;margin:0;font-family:Arial, Helvetica, sans-serif;background:var(--bg);color:var(--text)}
-    .sidebar{
-      width:120px;background:var(--card);padding:20px;height:100vh;position:fixed;left:0;top:0;display:flex;flex-direction:column;gap:18px;border-right:3px solid var(--accent)
+
+    header {
+      background-color: #ff66b2;
+      color: white;
+      text-align: center;
+      padding: 15px;
+      font-size: 24px;
+      letter-spacing: 1px;
     }
-    .sidebar h2{color:var(--text);text-align:center;margin:0;font-size:16px}
-    .sidebar button{background:var(--accent);color:var(--text);border:none;padding:10px;border-radius:6px;cursor:pointer;font-size:14px}
-    .sidebar button:hover{background:#cc0000}
-    .main-content{margin-left:150px;padding:20px;min-height:100vh}
-    .container{max-width:880px;margin:auto;background:var(--card);padding:18px;border-radius:10px}
-    h1{color:var(--accent);text-align:center;margin:6px 0 12px}
-    label,h3{color:#00ccff;margin:8px 0}
-    input[type="text"], input[type="number"]{
-      width:100%;padding:8px;margin:6px 0;border:none;border-radius:6px;background:#2a2a2a;color:var(--text)
+
+    nav {
+      background-color: #ff99cc;
+      padding: 10px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
     }
-    .btn-center{display:flex;justify-content:center;gap:10px;margin-top:10px}
-    button.action{background:var(--accent);border:none;color:var(--text);padding:10px 18px;border-radius:6px;cursor:pointer}
-    button.action:hover{background:#cc0000}
-    #resultados{margin-top:6px}
-    #resultados button{display:block;width:100%;text-align:left;padding:8px;margin:6px 0;border-radius:6px;border:none;background:#2a2a2a;color:var(--text);cursor:pointer}
-    #resultados button:hover{background:#333}
-    #listaCompras p{background:#2a2a2a;padding:8px;border-radius:6px}
-    #listaCompras button{float:right;background:#ff5555;border:none;color:white;padding:4px 8px;border-radius:4px;cursor:pointer}
-    table{width:100%;border-collapse:collapse;margin-top:18px;background:#333}
-    th,td{border:1px solid #fff;padding:10px;text-align:center}
-    th{background:var(--accent)}
-    footer{text-align:center;padding:12px;background:#111;color:#999;border-top:2px solid var(--accent);margin-top:20px}
-    @media screen and (max-width:768px){
-      .sidebar{width:100%;height:auto;flex-direction:row;justify-content:center;border-right:none;border-bottom:4px solid var(--accent)}
-      .main-content{margin-left:0;margin-top:120px}
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    nav a:hover {
+      color: #ffe6f0;
+    }
+
+    .container {
+      max-width: 1000px;
+      background: white;
+      margin: 30px auto;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      color: #e60073;
+      text-align: center;
+    }
+
+    input, button {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #ff66b2;
+      box-shadow: 0 0 5px #ff99cc;
+    }
+
+    button {
+      background-color: #ff66b2;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #e60073;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #ffb3d9;
+      color: #333;
+    }
+
+    .autocomplete-list {
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      max-height: 150px;
+      overflow-y: auto;
+      position: absolute;
+      width: 92%;
+      z-index: 10;
+    }
+
+    .autocomplete-item {
+      padding: 8px;
+      cursor: pointer;
+    }
+
+    .autocomplete-item:hover {
+      background-color: #ffe6f0;
+    }
+
+    canvas {
+      width: 100%;
+      max-height: 300px;
+      margin-top: 30px;
+    }
+
+    .delete-btn {
+      background-color: #ff3366;
+      border: none;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .delete-btn:hover {
+      background-color: #cc0044;
     }
   </style>
 </head>
 <body>
 
-  <div class="sidebar">
-    <h2>Menú</h2>
-    <button onclick="mostrarSeccion('inicio')">Inicio</button>
-    <button onclick="mostrarSeccion('tabla')">Historial</button>
-    <button onclick="mostrarSeccion('graficas')">Gráficas</button>
+  <header>🍭 Tienda de Golosinas 🍬</header>
+
+  <nav>
+    <a href="#">Inicio</a>
+    <a href="#">Ventas</a>
+    <a href="#">Productos</a>
+    <a href="#">Reportes</a>
+  </nav>
+
+  <div class="container">
+    <h2>Registrar Venta</h2>
+    <div style="position: relative;">
+      <input type="text" id="nombreProducto" placeholder="Buscar producto...">
+      <div id="sugerencias" class="autocomplete-list" style="display:none;"></div>
+    </div>
+    <input type="number" id="cantidad" placeholder="Cantidad" min="1">
+    <button onclick="agregarProducto()">Agregar producto</button>
+    <button onclick="finalizarVenta()">Finalizar venta</button>
+
+    <div id="mensaje"></div>
+
+    <div id="tablaCompras"></div>
+
+    <h2>📊 Gráfico de Ventas por Producto</h2>
+    <canvas id="graficoProductos"></canvas>
+
+    <h2>📈 Gráfico de Ventas por Número de Venta</h2>
+    <canvas id="graficoVentas"></canvas>
   </div>
 
-  <div class="main-content">
-    <div class="container" id="inicio">
-      <h1>Tienda de Golosinas "La Económica"</h1>
-
-      <h3>Número de venta actual: <span id="numeroVentaDisplay">#1</span></h3>
-
-      <h3>Buscar producto</h3>
-      <input type="text" id="busqueda" placeholder="Escribe aquí (ej: Gansito)"/>
-      <div id="resultados"></div>
-
-      <h3>Cantidad</h3>
-      <input type="number" id="cantidad" placeholder="Ej: 3" min="1"/>
-
-      <div class="btn-center">
-        <button class="action" onclick="agregarProducto()">Agregar al carrito</button>
-        <button class="action" onclick="finalizarCompra()">Finalizar venta</button>
-      </div>
-
-      <div id="listaCompras" style="margin-top:14px"></div>
-      <h3 id="totalCompra" style="margin-top:10px"></h3>
-    </div>
-
-    <div class="container" id="tablaCompras" style="display:none"></div>
-
-    <div class="container" id="seccionGraficas" style="display:none">
-      <h2 style="color:var(--accent);text-align:center">Gráficas de Ventas</h2>
-      <canvas id="graficoVentas" width="600" height="300"></canvas>
-    </div>
-  </div>
-
-  <footer>
-    Proyecto desarrollado por Dylan Tirado — Ingeniería de Sistemas (CUN)
-  </footer>
-
-<script>
-/* ===== CATÁLOGO (golosinas) ===== */
-const catalogo = [
-  {nombre:"Gansito",precio:2500},{nombre:"Gansito Mini",precio:1200},{nombre:"Chocorramo",precio:3000},
-  {nombre:"Chocorramo Mini",precio:1800},{nombre:"Gala",precio:3500},{nombre:"Jet",precio:800},
-  {nombre:"Jet Mini",precio:500},{nombre:"Bon Bon Bum",precio:400},{nombre:"Rocklets",precio:1200},
-  {nombre:"M&M's",precio:1200},{nombre:"Chocolatina Jet",precio:1100},{nombre:"Chocobreak",precio:1000},
-  {nombre:"Bocadillo",precio:900},{nombre:"Bocadillo con Queso",precio:1000},{nombre:"Bon o Bon",precio:850},
-  {nombre:"Bon o Bon Doble",precio:1400},{nombre:"Choclitos",precio:950},{nombre:"Chocokrispis",precio:3000},
-  {nombre:"Chocapic",precio:3500},{nombre:"Toblerone Mini",precio:2200},{nombre:"Hershey's Mini",precio:2000},
-  {nombre:"Oreo Pack",precio:2800},{nombre:"Oreo Mini",precio:900},{nombre:"Chips Ahoy",precio:3000},
-  {nombre:"Galletas Festival",precio:2800},{nombre:"Galletas Ducales",precio:2400},{nombre:"Gomitas Salvavidas",precio:1500},
-  {nombre:"Gomitas Colores",precio:1300},{nombre:"Gomitas Ositos",precio:1400},{nombre:"Pica Pica",precio:600},
-  {nombre:"Pica Roca",precio:700},{nombre:"Platanitos",precio:2200},{nombre:"Doritos",precio:2300},
-  {nombre:"Papas Lays",precio:3500},{nombre:"Tostacos",precio:2200},{nombre:"Detodito",precio:2800},
-  {nombre:"Detodito BBQ",precio:2900},{nombre:"Detodito Limón",precio:2900},{nombre:"Trululu",precio:1200},
-  {nombre:"Trululu Ácido",precio:1300},{nombre:"Trululu Corazones",precio:1300},{nombre:"Trululu Gusanos",precio:1400},
-  {nombre:"Frunas",precio:700},{nombre:"Frunas Ácidas",precio:750},{nombre:"Chicle Trident",precio:1500},
-  {nombre:"Chicle Bomba",precio:800},{nombre:"Tic Tac",precio:1200},{nombre:"Halls",precio:1100},
-  {nombre:"Mentas",precio:900},{nombre:"Caramelos Bony",precio:600},{nombre:"Caramelos Frutales",precio:700},
-  {nombre:"Caramelos de Miel",precio:800},{nombre:"Chocolatina Corona",precio:5200},{nombre:"Milo Barra",precio:1500},
-  {nombre:"Milo Ready to Drink",precio:2500},{nombre:"Chocolatina Jet Wafer",precio:1300},{nombre:"Choco Wafer",precio:1250},
-  {nombre:"Chocoboom",precio:1700},{nombre:"Mini Oreo",precio:700},{nombre:"Maní Salado",precio:3000},
-  {nombre:"Maní Limón",precio:3200},{nombre:"Maní Japones",precio:3400},{nombre:"Paleta Payaso",precio:900},
-  {nombre:"Paleta de Caramelo",precio:600},{nombre:"Paleta Piruleta",precio:700},{nombre:"Barras de Caramelo",precio:800},
-  {nombre:"Arequipe Alpina Mini",precio:900},{nombre:"Ponqué Ramitos",precio:4200},{nombre:"Pan de Vainilla Mini",precio:1200},
-  {nombre:"Buñuelos x6",precio:6200},{nombre:"Empanadas x3",precio:3800},{nombre:"Mantequilla Rama Mini",precio:3200},
-  {nombre:"Yogurt Drink Mini",precio:1200},{nombre:"Yogurt Alpina 1L",precio:5800},{nombre:"Chocolate Negro Mini",precio:1400},
-  {nombre:"Caramelos Toffee",precio:1100},{nombre:"Chocoramo Doble",precio:3800},{nombre:"Chocorramo XXL",precio:4800},
-  {nombre:"Chocorramo Mini Pack",precio:2200},{nombre:"Jet Mix",precio:900},{nombre:"Jet Maní",precio:1100},
-  {nombre:"Rocklets Bolsa",precio:1600},{nombre:"M&M's Bolsa",precio:1800},{nombre:"Galletas Chocoso",precio:2500},
-  {nombre:"Galletas Chokis",precio:2600},{nombre:"Cerealitas Dulces",precio:900},{nombre:"Palomitas Caramelo",precio:1400},
-  {nombre:"Jugo Hit Mango 250ml",precio:1200},{nombre:"Coca Cola 350ml (mini)",precio:2200},{nombre:"Agua 600ml",precio:1500},
-  {nombre:"Red Bull 250ml",precio:8500},{nombre:"Gomitas Corazón",precio:1400},{nombre:"Gomitas Paleta",precio:1500},
-  {nombre:"Pica Pica Sour",precio:800},{nombre:"Chocolatina Mini Surtida",precio:1000}
-];
-
-/* ===== Estado persistente ===== */
-let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
-let historial = JSON.parse(localStorage.getItem('historial')) || [];
-let contadorVentas = JSON.parse(localStorage.getItem('contadorVentas')) || 1;
-
-/* Mostrar numero de venta */
-function actualizarNumeroVentaDisplay(){ document.getElementById('numeroVentaDisplay').textContent = "#" + contadorVentas; }
-
-/* guardar todo */
-function guardar(){ localStorage.setItem('carrito', JSON.stringify(carrito)); localStorage.setItem('historial', JSON.stringify(historial)); localStorage.setItem('contadorVentas', JSON.stringify(contadorVentas)); }
-
-/* ===== Sugerencias al escribir ===== */
-const inputBusqueda = document.getElementById('busqueda');
-const resultadosDiv = document.getElementById('resultados');
-
-inputBusqueda.addEventListener('input', () => {
-  const texto = inputBusqueda.value.trim().toLowerCase();
-  resultadosDiv.innerHTML = "";
-  if (texto === "") return;
-  // buscar coincidencias (porciones)
-  const matches = catalogo.filter(p => p.nombre.toLowerCase().includes(texto));
-  matches.slice(0,12).forEach(p => {
-    const btn = document.createElement('button');
-    btn.textContent = `${p.nombre} - $${p.precio.toLocaleString('es-CO')}`;
-    btn.onclick = () => {
-      inputBusqueda.value = p.nombre;
-      resultadosDiv.innerHTML = "";
-      document.getElementById('cantidad').focus();
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const productos = {
+      "gansito": 2500, "chocorramo": 3000, "galleta festival": 1200,
+      "jet": 1000, "bon bon bum": 600, "snickers": 2700,
+      "ponymalta": 2500, "papas margarita": 2500, "detodito": 3000,
+      "milky way": 2800, "galleta oreo": 1500, "trululu": 2300,
+      "frunas": 400, "bubbaloo": 500, "milkybar": 2000, "doritos": 2500
     };
-    resultadosDiv.appendChild(btn);
-  });
-  if(matches.length===0){
-    const no = document.createElement('div'); no.textContent = "No hay coincidencias"; no.style.color = '#ffcc66'; resultadosDiv.appendChild(no);
-  }
-});
 
-/* ===== Agregar producto al carrito (mismo numeroVenta) ===== */
-function agregarProducto(){
-  const nombre = document.getElementById('busqueda').value.trim();
-  const cantidad = parseInt(document.getElementById('cantidad').value);
-  if(!nombre){ alert("Selecciona o escribe un producto."); return; }
-  if(!cantidad || cantidad <= 0){ alert("Ingresa una cantidad válida."); return; }
-  // buscar producto en catálogo (insensible mayus/minus)
-  const encontrado = catalogo.find(p => p.nombre.toLowerCase() === nombre.toLowerCase());
-  if(!encontrado){ alert("Producto no encontrado en catálogo."); return; }
-  const total = encontrado.precio * cantidad;
-  carrito.push({ nombre: encontrado.nombre, cantidad, precio: encontrado.precio, total, numeroVenta: contadorVentas });
-  guardar();
-  mostrarCarrito();
-  document.getElementById('busqueda').value = ""; document.getElementById('cantidad').value = "";
-}
+    let numeroVenta = 1;
+    let historial = [];
 
-/* Mostrar carrito de la venta en curso */
-function mostrarCarrito(){
-  const cont = document.getElementById('listaCompras');
-  cont.innerHTML = "";
-  carrito.forEach((p,idx)=> {
-    const pEl = document.createElement('p');
-    pEl.innerHTML = `${p.nombre} (x${p.cantidad}) - $${p.total.toLocaleString('es-CO')} <button onclick="eliminarProducto(${idx})">X</button>`;
-    cont.appendChild(pEl);
-  });
-  const totalGen = carrito.reduce((s,a)=>s+a.total,0);
-  document.getElementById('totalCompra').innerText = carrito.length? ("Total de esta venta: $" + totalGen.toLocaleString('es-CO')) : "";
-}
+    // --- Sugerencias de producto ---
+    const inputProducto = document.getElementById("nombreProducto");
+    const listaSugerencias = document.getElementById("sugerencias");
 
-/* eliminar item del carrito */
-function eliminarProducto(i){
-  carrito.splice(i,1); guardar(); mostrarCarrito();
-}
+    inputProducto.addEventListener("input", () => {
+      const texto = inputProducto.value.toLowerCase();
+      listaSugerencias.innerHTML = "";
+      if (!texto) {
+        listaSugerencias.style.display = "none";
+        return;
+      }
 
-/* finalizar compra: pasar carrito al historial y aumentar contador */
-function finalizarCompra(){
-  if(carrito.length===0){ alert("No hay productos en el carrito."); return; }
-  // añadir copia de items al historial (ya contienen numeroVenta)
-  historial.push(...carrito);
-  carrito = [];
-  guardar();
-  mostrarCarrito();
-  contadorVentas++;
-  guardar();
-  actualizarNumeroVentaDisplay();
-  alert("Venta registrada correctamente. Número de venta: #" + (contadorVentas-1));
-}
+      const filtrados = Object.keys(productos).filter(p => p.includes(texto));
+      if (filtrados.length === 0) {
+        listaSugerencias.style.display = "none";
+        return;
+      }
 
-/* ===== Generar tabla (historial) ===== */
-function generarTabla(){
-  const tabla = document.getElementById('tablaCompras');
-  if(historial.length===0){ tabla.innerHTML = '<p style="color:yellow">No hay ventas registradas aún.</p>'; return; }
-  let html = `<h3>Historial de Ventas</h3><table><tr><th># Venta</th><th>Producto</th><th>Cantidad</th><th>Precio Unit.</th><th>Total</th></tr>`;
-  historial.forEach(item=>{
-    html += `<tr><td>#${item.numeroVenta}</td><td>${item.nombre}</td><td>${item.cantidad}</td><td>$${item.precio.toLocaleString('es-CO')}</td><td>$${item.total.toLocaleString('es-CO')}</td></tr>`;
-  });
-  html += `</table>`;
-  tabla.innerHTML = html;
-}
+      listaSugerencias.style.display = "block";
+      filtrados.forEach(p => {
+        const item = document.createElement("div");
+        item.classList.add("autocomplete-item");
+        item.innerHTML = `${p} - $${productos[p].toLocaleString("es-CO")}`;
+        item.onclick = () => {
+          inputProducto.value = p;
+          listaSugerencias.style.display = "none";
+        };
+        listaSugerencias.appendChild(item);
+      });
+    });
 
-/* ===== Gráfica ===== */
-function mostrarGrafico(){
-  const ctx = document.getElementById('graficoVentas');
-  Chart.getChart(ctx)?.destroy();
-  const mapa = {};
-  historial.forEach(h => { mapa[h.nombre] = (mapa[h.nombre]||0) + h.total; });
-  const labels = Object.keys(mapa);
-  const data = Object.values(mapa);
-  if(labels.length===0){
-    // limpiar canvas
-    ctx.getContext('2d').clearRect(0,0,ctx.width,ctx.height);
-    return;
-  }
-  new Chart(ctx, {
-    type:'bar',
-    data:{ labels, datasets:[{ label:'Ventas totales', data, backgroundColor:'lightgreen' }]},
-    options:{ scales:{ y:{ beginAtZero:true } } }
-  });
-}
+    // --- Agregar producto ---
+    function agregarProducto() {
+      const nombre = inputProducto.value.trim().toLowerCase();
+      const cantidad = parseInt(document.getElementById("cantidad").value);
+      const mensaje = document.getElementById("mensaje");
 
-/* ===== Navegación entre secciones ===== */
-function mostrarSeccion(sec){
-  document.getElementById('inicio').style.display = sec==='inicio' ? 'block' : 'none';
-  document.getElementById('tablaCompras').style.display = sec==='tabla' ? 'block' : 'none';
-  document.getElementById('seccionGraficas').style.display = sec==='graficas' ? 'block' : 'none';
-  if(sec==='tabla') generarTabla();
-  if(sec==='graficas') mostrarGrafico();
-}
+      if (!productos[nombre]) {
+        mensaje.innerHTML = `<p style="color:red">❌ Producto no encontrado.</p>`;
+        return;
+      }
+      if (!cantidad || cantidad <= 0) {
+        mensaje.innerHTML = `<p style="color:red">❌ Cantidad inválida.</p>`;
+        return;
+      }
 
-/* ===== Inicio: cargar datos guardados y mostrar estado ===== */
-window.onload = function(){
-  carrito = JSON.parse(localStorage.getItem('carrito')) || [];
-  historial = JSON.parse(localStorage.getItem('historial')) || [];
-  contadorVentas = JSON.parse(localStorage.getItem('contadorVentas')) || 1;
-  actualizarNumeroVentaDisplay();
-  mostrarCarrito();
-  // si venías en sección gráfica o tabla, no cambiar; por defecto inicio
-  mostrarSeccion('inicio');
-};
-</script>
+      const precio = productos[nombre];
+      const total = precio * cantidad;
+      historial.push({ numeroVenta, nombre, cantidad, precio, total });
+
+      mensaje.innerHTML = `<p style="color:green">✅ ${cantidad} ${nombre}(s) agregado(s) a la venta #${numeroVenta}</p>`;
+      inputProducto.value = "";
+      document.getElementById("cantidad").value = "";
+
+      mostrarTabla();
+      mostrarGraficos();
+    }
+
+    // --- Finalizar venta ---
+    function finalizarVenta() {
+      numeroVenta++;
+      document.getElementById("mensaje").innerHTML =
+        `<p style="color:blue">💰 Venta finalizada. Nueva venta (#${numeroVenta}).</p>`;
+    }
+
+    // --- Eliminar una venta completa ---
+    function eliminarVenta(num) {
+      historial = historial.filter(p => p.numeroVenta !== num);
+      mostrarTabla();
+      mostrarGraficos();
+      document.getElementById("mensaje").innerHTML =
+        `<p style="color:red">🗑️ Venta #${num} eliminada.</p>`;
+    }
+
+    // --- Mostrar tabla ---
+    function mostrarTabla() {
+      const tabla = document.getElementById("tablaCompras");
+      if (historial.length === 0) {
+        tabla.innerHTML = "<p>No hay compras registradas.</p>";
+        return;
+      }
+
+      let html = `<h3>Historial de Compras</h3>
+      <table><tr><th>N° Venta</th><th>Producto</th><th>Cantidad</th><th>Precio Unitario</th><th>Total</th><th>Acción</th></tr>`;
+
+      historial.forEach(p => {
+        html += `<tr>
+          <td>#${p.numeroVenta}</td>
+          <td>${p.nombre}</td>
+          <td>${p.cantidad}</td>
+          <td>$${p.precio.toLocaleString("es-CO")}</td>
+          <td>$${p.total.toLocaleString("es-CO")}</td>
+          <td><button class="delete-btn" onclick="eliminarVenta(${p.numeroVenta})">Eliminar</button></td>
+        </tr>`;
+      });
+
+      html += `</table>`;
+      tabla.innerHTML = html;
+    }
+
+    // --- Mostrar gráficos ---
+    function mostrarGraficos() {
+      const ctxProd = document.getElementById("graficoProductos");
+      const ctxVenta = document.getElementById("graficoVentas");
+      Chart.getChart(ctxProd)?.destroy();
+      Chart.getChart(ctxVenta)?.destroy();
+
+      // Gráfico por producto
+      const productosMap = {};
+      historial.forEach(p => {
+        productosMap[p.nombre] = (productosMap[p.nombre] || 0) + p.total;
+      });
+
+      new Chart(ctxProd, {
+        type: "bar",
+        data: {
+          labels: Object.keys(productosMap),
+          datasets: [{
+            label: "Ventas Totales por Producto",
+            data: Object.values(productosMap),
+            backgroundColor: "#ff99cc"
+          }]
+        },
+        options: { scales: { y: { beginAtZero: true } } }
+      });
+
+      // Gráfico por número de venta
+      const ventasMap = {};
+      historial.forEach(p => {
+        ventasMap[p.numeroVenta] = (ventasMap[p.numeroVenta] || 0) + p.total;
+      });
+
+      new Chart(ctxVenta, {
+        type: "line",
+        data: {
+          labels: Object.keys(ventasMap),
+          datasets: [{
+            label: "Total por Venta",
+            data: Object.values(ventasMap),
+            borderColor: "#ff3385",
+            fill: false,
+            tension: 0.2
+          }]
+        },
+        options: { scales: { y: { beginAtZero: true } } }
+      });
+    }
+  </script>
 </body>
 </html>
