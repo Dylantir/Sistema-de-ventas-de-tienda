@@ -67,7 +67,7 @@
     label, h3 {
       color: #00ccff;
     }
-    input[type="number"], input[type="text"] {
+    input[type="number"], input[type="text"], input[type="date"], select {
       width: 100%;
       padding: 8px;
       margin: 6px 0 12px;
@@ -160,7 +160,10 @@
     <!-- Sección inicio -->
     <div class="container" id="inicio">
       <h1>🍬 Tienda de Golosinas 🍭</h1>
-      <p>Bienvenido al sistema de registro y análisis de ventas de tu tienda.</p>
+      <p>Bienvenido al sistema de registro y análisis de ventas.</p>
+
+      <h3>Fecha de la venta</h3>
+      <input type="date" id="fechaVenta">
 
       <h3>Registrar Venta</h3>
       <input type="text" id="nombreProducto" placeholder="Nombre del producto" oninput="mostrarSugerencias()">
@@ -179,12 +182,16 @@
     <!-- Sección ventas -->
     <div class="container" id="ventas" style="display:none;">
       <h2>Historial de Ventas</h2>
+      <label for="fechaFiltro">Seleccionar fecha:</label>
+      <select id="fechaFiltro" onchange="mostrarTabla()"></select>
       <div id="tablaCompras"></div>
     </div>
 
     <!-- Sección gráficas -->
     <div class="container" id="graficas" style="display:none;">
       <h2>Gráficas de Ventas</h2>
+      <label for="fechaGrafica">Seleccionar fecha:</label>
+      <select id="fechaGrafica" onchange="mostrarGraficas()"></select>
       <canvas id="graficoProductos"></canvas>
       <canvas id="graficoVentas"></canvas>
     </div>
@@ -195,7 +202,6 @@
     Creada por Dylan Tirado, Ismael Cadena, Angie Martinez y Deimar Chaverra
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     const productos = {
       "gansito": 2500, "chocorramo": 3000, "galleta festival": 1200,
@@ -206,9 +212,38 @@
       "trululu": 1000, "gomitas fini": 2500, "agua cristal": 1500
     };
 
-    let numeroVenta = 1;
     let historial = [];
     let ventaActual = [];
+    let numeroVenta = 1;
+
+    document.getElementById("fechaVenta").valueAsDate = new Date();
+
+    function actualizarFechas() {
+      const fechas = [...new Set(historial.map(p => p.fecha))].sort();
+      const fechaFiltro = document.getElementById("fechaFiltro");
+      const fechaGrafica = document.getElementById("fechaGrafica");
+
+      fechaFiltro.innerHTML = "";
+      fechaGrafica.innerHTML = "";
+
+      if (fechas.length === 0) {
+        fechaFiltro.innerHTML = `<option>No hay fechas</option>`;
+        fechaGrafica.innerHTML = `<option>No hay fechas</option>`;
+        return;
+      }
+
+      fechas.forEach(f => {
+        const opt1 = document.createElement("option");
+        opt1.value = f;
+        opt1.textContent = f;
+        fechaFiltro.appendChild(opt1);
+
+        const opt2 = document.createElement("option");
+        opt2.value = f;
+        opt2.textContent = f;
+        fechaGrafica.appendChild(opt2);
+      });
+    }
 
     function mostrarSugerencias() {
       const entrada = document.getElementById('nombreProducto').value.toLowerCase();
@@ -292,41 +327,47 @@
         return;
       }
 
+      const fecha = document.getElementById('fechaVenta').value;
       ventaActual.forEach(p => {
-        historial.push({ numeroVenta, ...p });
+        historial.push({ fecha, numeroVenta, ...p });
       });
 
       document.getElementById('mensaje').innerHTML =
-        `<p style="color:yellow">💰 Venta #${numeroVenta} finalizada. Nueva venta #${numeroVenta + 1}</p>`;
+        `<p style="color:yellow">💰 Venta #${numeroVenta} del ${fecha} finalizada.</p>`;
       numeroVenta++;
       ventaActual = [];
       mostrarVentaActual();
+      actualizarFechas();
     }
 
-    function eliminarVenta(num) {
-      if (confirm(`¿Eliminar venta #${num}?`)) {
-        historial = historial.filter(p => p.numeroVenta !== num);
+    function eliminarVenta(num, fecha) {
+      if (confirm(`¿Eliminar venta #${num} del ${fecha}?`)) {
+        historial = historial.filter(p => !(p.numeroVenta === num && p.fecha === fecha));
         mostrarTabla();
         mostrarGraficas();
+        actualizarFechas();
       }
     }
 
     function mostrarTabla() {
+      const fechaSeleccionada = document.getElementById('fechaFiltro').value;
       const tabla = document.getElementById('tablaCompras');
-      if (historial.length === 0) {
-        tabla.innerHTML = '<p>No hay compras registradas aún.</p>';
+      const datos = historial.filter(p => p.fecha === fechaSeleccionada);
+
+      if (datos.length === 0) {
+        tabla.innerHTML = '<p>No hay ventas registradas para esta fecha.</p>';
         return;
       }
 
-      let html = `<table><tr><th>N° Venta</th><th>Producto</th><th>Cantidad</th><th>Precio Unitario</th><th>Total</th><th>Eliminar Venta</th></tr>`;
-      historial.forEach(p => {
+      let html = `<table><tr><th>N° Venta</th><th>Producto</th><th>Cant.</th><th>Precio</th><th>Total</th><th>Eliminar</th></tr>`;
+      datos.forEach(p => {
         html += `<tr>
           <td>#${p.numeroVenta}</td>
           <td>${p.nombre}</td>
           <td>${p.cantidad}</td>
           <td>$${p.precio.toLocaleString('es-CO')}</td>
           <td>$${p.total.toLocaleString('es-CO')}</td>
-          <td><button onclick="eliminarVenta(${p.numeroVenta})">X</button></td>
+          <td><button onclick="eliminarVenta(${p.numeroVenta}, '${p.fecha}')">X</button></td>
         </tr>`;
       });
       html += `</table>`;
@@ -334,18 +375,22 @@
     }
 
     function mostrarGraficas() {
+      const fechaSeleccionada = document.getElementById('fechaGrafica').value;
       const ctx1 = document.getElementById('graficoProductos');
       const ctx2 = document.getElementById('graficoVentas');
       Chart.getChart(ctx1)?.destroy();
       Chart.getChart(ctx2)?.destroy();
 
+      const datos = historial.filter(p => p.fecha === fechaSeleccionada);
       const productosVendidos = {};
       const ventasTotales = {};
 
-      historial.forEach(p => {
+      datos.forEach(p => {
         productosVendidos[p.nombre] = (productosVendidos[p.nombre] || 0) + p.total;
         ventasTotales[p.numeroVenta] = (ventasTotales[p.numeroVenta] || 0) + p.total;
       });
+
+      if (datos.length === 0) return;
 
       new Chart(ctx1, {
         type: 'bar',
