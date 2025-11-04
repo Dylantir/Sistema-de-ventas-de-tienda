@@ -5,99 +5,114 @@
   <title>Tienda de Golosinas</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #fff7f8;
-      color: #333;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #ffe6f0, #fff);
       margin: 0;
-      padding: 20px;
+      padding: 0;
     }
-    h1 {
+
+    header {
+      background-color: #ff4da6;
+      color: white;
       text-align: center;
-      color: #e60073;
-    }
-    .contenedor {
-      max-width: 900px;
-      margin: auto;
-      background: #fff;
-      border-radius: 15px;
-      padding: 20px;
+      padding: 20px 0;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
-    input, button {
+
+    h1 {
+      margin: 0;
+      font-size: 2.5em;
+    }
+
+    main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px;
+    }
+
+    .contenedor {
+      background: #fff;
+      border-radius: 15px;
+      padding: 25px;
+      width: 90%;
+      max-width: 900px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    input, button, datalist {
       padding: 10px;
       margin: 5px;
       border-radius: 8px;
       border: 1px solid #ccc;
+      font-size: 1em;
     }
+
     button {
-      background: #ff4da6;
+      background-color: #ff4da6;
       color: white;
+      border: none;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: #ff1a8c;
       cursor: pointer;
     }
-    button:hover {
-      background: #ff1a8c;
-    }
+
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 20px;
     }
+
     th, td {
       border: 1px solid #ddd;
-      padding: 8px;
+      padding: 10px;
       text-align: center;
     }
+
     th {
-      background: #ffb3d9;
+      background-color: #ffe6f0;
     }
+
+    #mensaje {
+      margin-top: 15px;
+      font-weight: 600;
+    }
+
     canvas {
       width: 100%;
       max-height: 300px;
       margin-top: 30px;
     }
-    /* lista de sugerencias */
-    #listaSugerencias {
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      max-height: 150px;
-      overflow-y: auto;
-      background: white;
-      position: absolute;
-      width: 300px;
-      z-index: 100;
-    }
-    #listaSugerencias div {
-      padding: 8px;
-      cursor: pointer;
-    }
-    #listaSugerencias div:hover {
-      background-color: #ffe6f0;
-    }
+
   </style>
 </head>
 <body>
+  <header>
+    <h1> Tienda de Golosinas 🍭</h1>
+  </header>
 
-  <h1> Tienda de Golosinas </h1>
-  <div class="contenedor">
-    <h3>Registrar Venta</h3>
-    <div style="position: relative;">
-      <input type="text" id="nombreProducto" placeholder="Nombre del producto (ej: Gansito)" onkeyup="mostrarSugerencias()">
-      <div id="listaSugerencias"></div>
+  <main>
+    <div class="contenedor">
+      <h2>Registrar Venta</h2>
+      <input list="listaProductos" id="nombreProducto" placeholder="Escribe el nombre del producto">
+      <datalist id="listaProductos"></datalist>
+      <input type="number" id="cantidad" placeholder="Cantidad" min="1">
+      <button onclick="agregarProducto()">Agregar producto</button>
+      <button onclick="finalizarVenta()">Finalizar venta</button>
+
+      <div id="mensaje"></div>
+      <div id="tablaCompras"></div>
+
+      <canvas id="graficoVentas"></canvas>
     </div>
-    <input type="number" id="cantidad" placeholder="Cantidad" min="1">
-    <button onclick="agregarProducto()">Agregar producto</button>
-    <button onclick="finalizarVenta()">Finalizar venta</button>
-
-    <div id="mensaje"></div>
-
-    <div id="tablaCompras"></div>
-
-    <canvas id="graficoVentas"></canvas>
-  </div>
+  </main>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    // ======= Datos iniciales =======
+    // ======= Productos predefinidos =======
     const productos = {
       "gansito": 2500, "chocorramo": 3000, "galleta festival": 1200,
       "galleta oreo": 1500, "jet": 1000, "bon bon bum": 600, "milky way": 2800,
@@ -133,38 +148,35 @@
     };
 
     let numeroVenta = 1;
-    let historial = JSON.parse(localStorage.getItem("historial")) || [];
+    let historial = [];
 
-    // ======= Mostrar sugerencias =======
-    function mostrarSugerencias() {
-      const input = document.getElementById("nombreProducto");
-      const sugerencias = document.getElementById("listaSugerencias");
-      const texto = input.value.trim().toLowerCase();
-      sugerencias.innerHTML = "";
+    // ======= Autocompletado dinámico =======
+    const inputProducto = document.getElementById('nombreProducto');
+    const listaProductos = document.getElementById('listaProductos');
 
-      if (texto === "") return;
+    inputProducto.addEventListener('input', () => {
+      const texto = inputProducto.value.toLowerCase();
+      listaProductos.innerHTML = '';
+      if (texto.length === 0) return;
 
-      const coincidencias = Object.keys(productos).filter(p => p.includes(texto));
-
-      coincidencias.forEach(p => {
-        const div = document.createElement("div");
-        div.textContent = `${p} - $${productos[p].toLocaleString("es-CO")}`;
-        div.onclick = () => {
-          input.value = p;
-          sugerencias.innerHTML = "";
-        };
-        sugerencias.appendChild(div);
-      });
-    }
+      Object.keys(productos)
+        .filter(p => p.includes(texto))
+        .forEach(nombre => {
+          const option = document.createElement('option');
+          option.value = nombre;
+          option.textContent = `${nombre} - $${productos[nombre].toLocaleString('es-CO')}`;
+          listaProductos.appendChild(option);
+        });
+    });
 
     // ======= Agregar producto =======
     function agregarProducto() {
-      const nombre = document.getElementById('nombreProducto').value.trim().toLowerCase();
+      const nombre = inputProducto.value.trim().toLowerCase();
       const cantidad = parseInt(document.getElementById('cantidad').value);
       const mensaje = document.getElementById('mensaje');
 
       if (!productos[nombre]) {
-        mensaje.innerHTML = `<p style="color:red">❌ Producto no encontrado. Intenta con otro nombre.</p>`;
+        mensaje.innerHTML = `<p style="color:red">❌ Producto no encontrado.</p>`;
         return;
       }
       if (!cantidad || cantidad <= 0) {
@@ -175,10 +187,9 @@
       const precio = productos[nombre];
       const total = precio * cantidad;
       historial.push({ numeroVenta, nombre, cantidad, precio, total });
-      localStorage.setItem("historial", JSON.stringify(historial));
 
       mensaje.innerHTML = `<p style="color:green">✅ ${cantidad} ${nombre}(s) agregado(s) a la venta #${numeroVenta}</p>`;
-      document.getElementById('nombreProducto').value = '';
+      inputProducto.value = '';
       document.getElementById('cantidad').value = '';
       mostrarTabla();
       mostrarGrafico();
@@ -188,7 +199,7 @@
     function finalizarVenta() {
       numeroVenta++;
       document.getElementById('mensaje').innerHTML =
-        `<p style="color:blue">💰 Venta #${numeroVenta - 1} finalizada. Iniciando nueva venta (#${numeroVenta})...</p>`;
+        `<p style="color:blue">💰 Venta #${numeroVenta - 1} finalizada. Nueva venta (#${numeroVenta}) iniciada.</p>`;
     }
 
     // ======= Mostrar tabla =======
@@ -199,7 +210,7 @@
         return;
       }
 
-      let html = `<h3>Historial de Compras</h3>
+      let html = `<h3>Historial de Ventas</h3>
       <table><tr><th>N° Venta</th><th>Producto</th><th>Cantidad</th><th>Precio Unitario</th><th>Total</th></tr>`;
 
       historial.forEach(p => {
@@ -241,7 +252,7 @@
           datasets: [{
             label: 'Ventas Totales por Producto',
             data: totales,
-            backgroundColor: 'pink'
+            backgroundColor: '#ff4da6'
           }]
         },
         options: {
@@ -249,9 +260,6 @@
         }
       });
     }
-
-    mostrarTabla();
-    mostrarGrafico();
   </script>
 </body>
 </html>
