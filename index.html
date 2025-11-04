@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tienda de Barrio La Económica</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      background-color: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    .sidebar {
+      width: 140px;
+      background-color: #1c1c1c;
+      padding: 20px;
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      border-right: 3px solid red;
+    }
+    .sidebar h2 {
+      color: white;
+      text-align: center;
+    }
+    .sidebar button {
+      background-color: red;
+      color: white;
+      border: none;
+      padding: 10px;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+    .sidebar button:hover {
+      background-color: #cc0000;
+    }
+    .main-content {
+      margin-left: 170px;
+      padding: 20px;
+      flex: 1;
+    }
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background-color: #1c1c1c;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    h1 {
+      color: red;
+      text-align: center;
+    }
+    label, h3 {
+      color: #00ccff;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin: 6px 0 12px;
+      border: none;
+      border-radius: 5px;
+    }
+    .btn-center {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+    button {
+      background-color: red;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #cc0000;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #333;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #fff;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: red;
+    }
+    td {
+      background-color: #444;
+    }
+    footer {
+      text-align: center;
+      padding: 15px;
+      background-color: #111;
+      color: #999;
+      font-size: 14px;
+      border-top: 2px solid red;
+    }
+    @media screen and (max-width: 768px) {
+      .sidebar {
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        justify-content: center;
+        border-right: none;
+        border-bottom: 4px solid red;
+      }
+      .main-content {
+        margin-left: 0;
+        margin-top: 140px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <h2>Menú</h2>
+    <button onclick="mostrarSeccion('inicio')">Inicio</button>
+    <button onclick="mostrarSeccion('tabla')">Tabla de Compras</button>
+    <button onclick="mostrarSeccion('graficas')">Gráficas</button>
+  </div>
+
+  <div class="main-content">
+    <!-- Sección principal -->
+    <div class="container" id="inicio">
+      <h1>Tienda de Barrio "La Económica"</h1>
+
+      <h3>Selecciona un producto</h3>
+      <select id="producto">
+        <option value="">-- Selecciona --</option>
+        <option value="Gansito-2500">1. Gansito - $2500</option>
+        <option value="Chocorramo-3000">2. Chocorramo - $3000</option>
+        <option value="Gala-3500">3. Gala - $3500</option>
+        <option value="Pony Malta-2000">4. Pony Malta - $2000</option>
+        <option value="Papas Margarita-1800">5. Papas Margarita - $1800</option>
+      </select>
+
+      <h3>Cantidad</h3>
+      <input type="number" id="cantidad" placeholder="Ej: 3"/>
+
+      <div class="btn-center">
+        <button onclick="agregarProducto()">Agregar al carrito</button>
+      </div>
+
+      <div id="listaCompras"></div>
+
+      <div class="btn-center">
+        <button onclick="finalizarCompra()">Finalizar compra</button>
+      </div>
+
+      <h3 id="totalCompra"></h3>
+    </div>
+
+    <!-- Sección tabla -->
+    <div class="container" id="tablaCompras" style="display:none;"></div>
+
+    <!-- Sección gráficas -->
+    <div class="container" id="seccionGraficas" style="display:none;">
+      <h2>Gráficas de Ventas</h2>
+      <canvas id="graficoVentas"></canvas>
+    </div>
+  </div>
+
+  <footer>
+    Proyecto desarrollado por Dylan Tirado — Ingeniería de Sistemas (CUN)
+  </footer>
+
+  <script>
+    let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+    let historial = JSON.parse(localStorage.getItem('historial')) || [];
+
+    window.onload = () => mostrarCarrito();
+
+    function guardarDatos() {
+      localStorage.setItem('carrito', JSON.stringify(carrito));
+      localStorage.setItem('historial', JSON.stringify(historial));
+    }
+
+    function agregarProducto() {
+      const productoSelect = document.getElementById('producto').value;
+      const cantidad = parseInt(document.getElementById('cantidad').value);
+
+      if (!productoSelect || isNaN(cantidad) || cantidad <= 0) {
+        alert("Por favor selecciona un producto y una cantidad válida.");
+        return;
+      }
+
+      const [nombre, precioStr] = productoSelect.split("-");
+      const precio = parseFloat(precioStr);
+      const total = cantidad * precio;
+
+      carrito.push({ nombre, cantidad, precio, total });
+      guardarDatos();
+      mostrarCarrito();
+    }
+
+    function mostrarCarrito() {
+      const contenedor = document.getElementById('listaCompras');
+      contenedor.innerHTML = "";
+
+      carrito.forEach((p, index) => {
+        contenedor.innerHTML += `
+          <p>${p.nombre} (x${p.cantidad}) - $${p.total.toLocaleString('es-CO')}
+          <button onclick="eliminarProducto(${index})">X</button></p>`;
+      });
+
+      const totalGeneral = carrito.reduce((sum, p) => sum + p.total, 0);
+      document.getElementById('totalCompra').innerText = 
+        "Total de la compra: $" + totalGeneral.toLocaleString('es-CO');
+    }
+
+    function eliminarProducto(index) {
+      carrito.splice(index, 1);
+      guardarDatos();
+      mostrarCarrito();
+    }
+
+    function finalizarCompra() {
+      if (carrito.length === 0) {
+        alert("No hay productos en el carrito.");
+        return;
+      }
+
+      historial.push(...carrito);
+      carrito = [];
+      guardarDatos();
+      mostrarCarrito();
+      alert("Compra registrada con éxito.");
+    }
+
+    function mostrarSeccion(seccion) {
+      document.getElementById('inicio').style.display = seccion === 'inicio' ? 'block' : 'none';
+      document.getElementById('tablaCompras').style.display = seccion === 'tabla' ? 'block' : 'none';
+      document.getElementById('seccionGraficas').style.display = seccion === 'graficas' ? 'block' : 'none';
+
+      if (seccion === 'tabla') generarTabla();
+      if (seccion === 'graficas') mostrarGrafico();
+    }
+
+    function generarTabla() {
+      const tabla = document.getElementById('tablaCompras');
+      if (historial.length === 0) {
+        tabla.innerHTML = '<p style="color: yellow;">No hay compras registradas aún.</p>';
+        return;
+      }
+
+      let html = `<h3>Historial de Compras</h3>
+      <table><tr><th>Producto</th><th>Cantidad</th><th>Precio Unitario</th><th>Total</th></tr>`;
+
+      historial.forEach(p => {
+        html += `<tr>
+          <td>${p.nombre}</td>
+          <td>${p.cantidad}</td>
+          <td>$${p.precio.toLocaleString('es-CO')}</td>
+          <td>$${p.total.toLocaleString('es-CO')}</td>
+        </tr>`;
+      });
+
+      html += `</table>`;
+      tabla.innerHTML = html;
+    }
+
+    function mostrarGrafico() {
+      const ctx = document.getElementById('graficoVentas');
+      Chart.getChart(ctx)?.destroy();
+
+      const nombres = [];
+      const totales = [];
+
+      historial.forEach(p => {
+        const index = nombres.indexOf(p.nombre);
+        if (index === -1) {
+          nombres.push(p.nombre);
+          totales.push(p.total);
+        } else {
+          totales[index] += p.total;
+        }
+      });
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: nombres,
+          datasets: [{
+            label: 'Ventas Totales por Producto',
+            data: totales,
+            backgroundColor: 'lightgreen'
+          }]
+        },
+        options: {
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
